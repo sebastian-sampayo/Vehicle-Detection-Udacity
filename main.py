@@ -9,6 +9,7 @@
 # =========================================================================== #
 # Main file
 '''
+Here we have the whole video processing using the pipeline and filter over frames.
 '''
 
 # --------------------------------------------------------------------------- #
@@ -23,7 +24,7 @@ from params import *
 input_video_filename = 'project_video.mp4'
 output_video_filename = 'output_' + input_video_filename
 
-DEBUG = False
+DEBUG = False # used to extract frames of the video and see the outputs in between the pipeline
 # --------------------------------------------------------------------------- #
 # Retrieve camera calibration data from previous project (Advanced Lane Lines Finding)
 with open(camera_calibration_filename, mode='rb') as f:
