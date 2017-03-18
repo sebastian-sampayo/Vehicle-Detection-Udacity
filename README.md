@@ -1,6 +1,3 @@
-TODO:
-- lines in the code
-
 # Vehicle Detection Project
 
 The goals / steps of this project are the following:
