@@ -39,6 +39,10 @@ def convert_color(img, conv='RGB2YCrCb'):
 
 # --------------------------------------------------------------------------- #
 def convert_RGB2X(image, color_space='HSV'):
+    '''
+    Convert an image from RGB to 'color space'
+    Options: HSV, LUV, YUV, YCrCb, BGR
+    '''
     if color_space == 'HSV':
         output = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
     elif color_space == 'LUV':
@@ -109,6 +113,7 @@ def color_hist(img, nbins=32, bins_range=(0, 256)):
 
 # --------------------------------------------------------------------------- #
 # This function was copied from the Udacity Nanodegree course.
+# And then modified to return the hot windows instead of the drawn image.
 def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, 
               pix_per_cell, cell_per_block, spatial_size, hist_bins, color_space):
     """
@@ -284,6 +289,7 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
     return window_list
 
 # --------------------------------------------------------------------------- #
+# This is similar to slide_window() but scales the window depending on the 'y-axis' value,
 def slide_scaled_window(img, x_start_stop=[None, None], y_start_stop=[None, None], 
                     xy_window=(64, 64), xy_overlap=(0.5, 0.5), max_scale=3):
     """
@@ -387,6 +393,7 @@ def slide_scaled_window(img, x_start_stop=[None, None], y_start_stop=[None, None
 def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, debug=False):
     """
     Define a function to draw bounding boxes
+    In DEBUG mode we can see all the windows one at a time.
     """
     # Make a copy of the image
     imcopy = np.copy(img)
@@ -634,9 +641,11 @@ def draw_labeled_bboxes(img, labels, color=(0, 250, 0), thick=6):
     return img
 
 # --------------------------------------------------------------------------- #
-# Pipeline for vehicle detection
-# Expects an RGB input image
 def pipeline(image, mtx, dist, clf, scaler):
+    '''
+    Pipeline for vehicle detection
+    Expects an RGB input image
+    '''
     # Undistort test image
     image = cv2.undistort(image, mtx, dist, None, mtx)
 
@@ -676,9 +685,12 @@ def pipeline(image, mtx, dist, clf, scaler):
     return hot_windows
     
 # --------------------------------------------------------------------------- #
-# Pipeline for vehicle detection
-# Expects an RGB input image
 def pipeline_fast(image, mtx, dist, clf, scaler):
+    '''
+    Pipeline for vehicle detection
+    Expects an RGB input image
+    This version uses find_cars() function (i.e. HOG sub sampling), so performs faster
+    '''
     # Undistort test image
     image = cv2.undistort(image, mtx, dist, None, mtx)
     

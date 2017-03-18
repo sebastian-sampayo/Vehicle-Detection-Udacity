@@ -90,7 +90,6 @@ def process_image(image):
         plt.subplot(132)
         plt.imshow(heatmap, cmap='hot')
         plt.title('Heat Map')
-        # fig.tight_layout()
         plt.subplot(133)
         plt.imshow(result)
         plt.title('Final boxes')

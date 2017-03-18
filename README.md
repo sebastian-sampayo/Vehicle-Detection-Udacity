@@ -12,6 +12,15 @@ The goals / steps of this project are the following:
 * Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for vehicles detected.
 
+#### Source files index
+* main.py : main file for processing the input video and creating the output video.
+* params.py : Algorithm parameters used for image processing.
+* utils.py : Collection of functions used in the project.
+* analysis.py : Analysis of HOG features extraction.
+* pipeline.py : Analysis of train and classification pipeline.
+* classifier_pickle.p : Saved data of the trained classifier.
+* output_project_video.mp4 : Final output video.
+
 [//]: # (Image References)
 [image1]: ./output_images/car_not_car.png
 [image2]: ./output_images/HOG_color_example.png
@@ -21,8 +30,8 @@ The goals / steps of this project are the following:
 [image5]: ./output_images/heatmap.png
 [image6]: ./examples/labels_map.png
 [image7_example]: ./examples/output_bboxes.png
-[image7]: ./output_image/final_box.png
-[frames]: ./output_image/frames.png
+[image7]: ./output_images/final_box.png
+[frames]: ./output_images/frames.png
 [video1]: ./project_video.mp4
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
@@ -39,7 +48,7 @@ You're reading it!
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in the file called `analysis.py`.
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -58,6 +67,7 @@ Other color spaces that worked well too were HLS, HSV, YUV and LUV. Using those 
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
+The code for this step is contained in lines 524 through 604 of the file called `utils.py`, function `train_classifier()`, used in the file `pipeline.py`.
 I trained a linear SVM using `sklearn.svm.LinearSVC()` with the default parameters (C=1 for example). For the training and test data I used a combination of 
 [the GTI vehicle image database](http://www.gti.ssr.upm.es/data/Vehicle_database.html), 
 [the KITTI vision benchmark suite](http://www.cvlibs.net/datasets/kitti/), 
@@ -69,13 +79,13 @@ With the suggested parameters, the accuracy of the validation after training was
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I used two sizes of windows to search for cars in the image from the camera. A middle one of 90x90 to search for far and near-far vehicles, and a big one of 180x180 for the nearest vehicles. Furthermore, I set an overlap of 80% of the window, so I can detect smoother changes when a vehicle moves around the image.
+I used two sizes of windows to search for cars in the image from the camera. A middle one of 90x90 to search for far and near-far vehicles, and a big one of 180x180 for the nearest vehicles. Furthermore, I set an overlap of 80% of the window, so I can detect smoother changes when a vehicle moves around the image. I play with this values in the file `pipeline.py`.
 
 ![alt text][image3]
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+Ultimately I searched on those two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
 
 ![alt text][image4]
 
@@ -84,11 +94,12 @@ In order to improve the performance of the algorithm, I tried using HOG subsampl
 ### Video Implementation
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
+The code for this step is contained in the file called `main.py`.
 Here's a 
 [YouTube link to my video result](https://youtu.be/zxqPGv7t-no)
 and 
 [here](./output_project_video.mp4) 
-is a link to the .mp4 file. Both were produced using the original algorithm (not the HOG sub sampling one).
+is a link to the .mp4 file. Both were produced using the original algorithm (not the HOG sub sampling one) using the function `pipeline()` from lines 643 through 685 in file `utils.py`.
 
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
@@ -97,20 +108,9 @@ I recorded the positions of positive detections in each frame of the video.  Fro
 
 Then, I wrote an algorithm to save the hot windows found in 12 consecutive frames of the video to implement a kind of "moving average". I created a heatmap with all this windows and increased the threshold to identify vehicle positions. For each new frame processed, I took out the hot windows of the older frame and append the new hot windows, in a LIFO buffer fashion. I tried several sizes for the buffer looking for a tradeof between the clean up of false positives and a quick response to vehicle movement. If the buffer is too large, less false positives appear, but there is a little lag for the final box when the cars change their position quickly. I also considered that the video has approximately 25 frames per second, so taking 12 frames for the buffer is like taking the average over the last half second.
 
-[//]: # (Here are six frames and their corresponding heatmaps:)
-[//]: # (Here's an example result showing the heatmap from a frame of the video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid:)
-
 Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
 
-![alt text][frames]
-
-[//]: # (### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:)
-[//]: # (![alt text][image6])
-
-[//]: # (In the next image the resulting bounding boxes are drawn onto that same frame of the video:)
-
-[//]: # (![alt text][image7])
-
+![6 frames of the video][frames]
 
 ---
 
@@ -118,11 +118,9 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-[//]: # (Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  )
 It would be cool to work long time with the filtering alogirthm processing a buffer of frames in the video.
 Maybe we could get the output probabilities of the classifier (instead of a binary output) to fill in a continuous heatmap. This way, the final tracking box would be moving softer.
-[//]: # (We could for example, track the position of the center of the blob instead of the maximum and minimum of the thresholded heatmap, in order to make softer the movement of the final box surrounding the car. )
-[//]: # (It will also be interesting to investigate deeper the classification of white cars, that appears to be a little more difficult than other cars. )
+We could for example, track the position of the center of the blob instead of the maximum and minimum of the thresholded heatmap, in order to make softer the movement of the final box surrounding the car.
 However, the classifier seems to achieve its objective identifying cars on the road. This result is amazing and really motivating to move forward on this subject.
 
 

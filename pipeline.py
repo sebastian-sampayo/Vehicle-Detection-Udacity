@@ -9,26 +9,6 @@
 # =========================================================================== #
 # Pipeline for image processing
 
-# Notes:
-#    It's not that bad. Major problem: False positives
-#    TODO: improvement: scaled windows (taking account perspective).
-#   
-# Classifier training results:
-# ----------------------------
-# (C:\Users\Sebastian\Miniconda3\envs\IntroToTensorFlow) C:\Users\Sebastian\Documents\GitHub\Vehicle-Detection-Udacitypython pipeline.py
-# Using: 9 orientations 8 pixels per cell and 2 cells per block
-# Feature vector length: 6108
-# 4.59 Seconds to train SVC...
-# Test Accuracy of SVC =  0.9885
-# 0.05 Seconds to predict...
-
-# (C:\Users\Sebastian\Miniconda3\envs\IntroToTensorFlow) C:\Users\Sebastian\Documents\GitHub\Vehicle-Detection-Udacitypython pipeline.py
-# Using: 9 orientations 8 pixels per cell and 2 cells per block
-# Feature vector length: 6108
-# 17.21 Seconds to train SVC...
-# Test Accuracy of SVC =  0.9854
-# 0.05 Seconds to predict...
-
 # --------------------------------------------------------------------------- #
 import numpy as np
 import matplotlib.pyplot as plt
