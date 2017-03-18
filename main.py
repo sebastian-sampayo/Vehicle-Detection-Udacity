@@ -23,6 +23,7 @@ from params import *
 input_video_filename = 'project_video.mp4'
 output_video_filename = 'output_' + input_video_filename
 
+DEBUG = False
 # --------------------------------------------------------------------------- #
 # Retrieve camera calibration data from previous project (Advanced Lane Lines Finding)
 with open(camera_calibration_filename, mode='rb') as f:
@@ -37,18 +38,20 @@ X_scaler = dist_pickle["scaler"]
 
 # A list to accumulate hot windows
 hot_windows_aux = []
-N_heat = 50
+N_heat = 12 # consider: 25 FPS
+heat_thresh = np.int(N_heat*3)
 for i in range(N_heat):
     # Init with empty lists.
     hot_windows_aux.append([])
-  
+
+counter = 0
 # This is the function that will process each image in the video
 def process_image(image):
     # NOTE: The output you return should be a color image (3 channel) for processing video below
 
     # Pipeline!
-#    new_hot_windows = pipeline(image, mtx, dist, svc, X_scaler)
-    new_hot_windows = pipeline_fast(image, mtx, dist, svc, X_scaler)
+    new_hot_windows = pipeline(image, mtx, dist, svc, X_scaler)
+    # new_hot_windows = pipeline_fast(image, mtx, dist, svc, X_scaler)
     
     # Accumulate the hot windows to 
     hot_windows_aux.pop()
@@ -65,7 +68,7 @@ def process_image(image):
     heat = add_heat(heat,hot_windows)
     
     # Apply threshold to help remove false positives
-    heat = apply_threshold(heat, np.int(N_heat*1.5))
+    heat = apply_threshold(heat, heat_thresh)
     
     # Visualize the heatmap when displaying    
     heatmap = np.clip(heat, 0, 255)
@@ -76,9 +79,30 @@ def process_image(image):
     result = draw_labeled_bboxes(draw_image, labels, color=(0, 200, 0), thick=5)
 #    result = np.dstack((heatmap, heatmap*0, heatmap*0))
 
+    if DEBUG:
+        global counter
+        plt.figure(figsize=(20,10))
+        plt.subplot(131)
+        window_img = draw_boxes(draw_image, hot_windows, color=(0, 200, 0), thick=2) 
+        plt.imshow(window_img)
+        plt.title('Hot windows of the last {} frames'.format(N_heat))
+        plt.subplot(132)
+        plt.imshow(heatmap, cmap='hot')
+        plt.title('Heat Map')
+        # fig.tight_layout()
+        plt.subplot(133)
+        plt.imshow(result)
+        plt.title('Final boxes')
+        plt.savefig('output_images/video_frames/debug_{}.png'.format(counter))
+        # plt.show()
+        counter += 1
+
     return result
 
 # Load video and process every image.
-clip1 = VideoFileClip(input_video_filename)#.subclip(20,40)
+if DEBUG:
+    clip1 = VideoFileClip(input_video_filename).subclip(38,39)
+else:
+    clip1 = VideoFileClip(input_video_filename)#.subclip(20,40)
 output_clip = clip1.fl_image(process_image) #NOTE: this function expects color images!!
 output_clip.write_videofile(output_video_filename, audio=False)

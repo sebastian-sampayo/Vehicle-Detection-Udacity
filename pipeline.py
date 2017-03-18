@@ -54,7 +54,7 @@ mtx, dist = calibration_data['mtx'], calibration_data['dist']
 dir_cars = 'data/vehicles'
 dir_notcars = 'data/non-vehicles'
 
-test_image = 'test_images/test3.jpg'
+test_image = 'test_images/test4.jpg'
 
 if TRAIN_MODE:
     [svc, X_scaler] = train_classifier(dir_cars, dir_notcars)
@@ -93,10 +93,10 @@ y_start_stop_near = [win_near*2, None] # near
 y_start_stop_nearfar = [win_near*2, np.int(img_shape[0]*3/4)] # in the middle
 
 windows_near = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop_near, 
-                    xy_window=xy_window_near, xy_overlap=(0.75, 0.75))
+                    xy_window=xy_window_near, xy_overlap=(0.8, 0.8))
 
 windows_nearfar = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop_nearfar, 
-                    xy_window=xy_window_nearfar, xy_overlap=(0.75, 0.75))
+                    xy_window=xy_window_nearfar, xy_overlap=(0.8, 0.8))
 
 #windows_far = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop_far, 
 #                    xy_window=xy_window_far, xy_overlap=(0.75, 0.75))
@@ -113,25 +113,25 @@ hot_windows = search_windows(image, windows, svc, X_scaler, color_space=color_sp
                         hog_channel=hog_channel, spatial_feat=spatial_feat, 
                         hist_feat=hist_feat, hog_feat=hog_feat)
 
-ystart = y_start_stop_near[0]
-ystop = img_shape[0] #y_start_stop_near[1]
-scale = 1.5
-window = win_near
-hot_windows_fast_near = find_cars(image, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, color_space)
+# ystart = y_start_stop_near[0]
+# ystop = img_shape[0] #y_start_stop_near[1]
+# scale = 1.5
+# window = win_near
+# hot_windows_fast_near = find_cars(image, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, color_space)
 
-ystart = y_start_stop_nearfar[0]
-ystop = y_start_stop_nearfar[1]
-#scale = 1
-window = win_nearfar
-hot_windows_fast_nearfar = find_cars(image, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, color_space)
+# ystart = y_start_stop_nearfar[0]
+# ystop = y_start_stop_nearfar[1]
+# #scale = 1
+# window = win_nearfar
+# hot_windows_fast_nearfar = find_cars(image, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, color_space)
 
-hot_windows_fast = []
-hot_windows_fast.extend(hot_windows_fast_near)
-hot_windows_fast.extend(hot_windows_fast_nearfar)
+# hot_windows_fast = []
+# hot_windows_fast.extend(hot_windows_fast_near)
+# hot_windows_fast.extend(hot_windows_fast_nearfar)
 
 window_img_debug = draw_boxes(draw_image, windows, color=(0, 200, 0), thick=1, debug=False) 
-window_img = draw_boxes(draw_image, hot_windows, color=(0, 200, 0), thick=1, debug=False) 
-window_img_fast = draw_boxes(draw_image, hot_windows_fast, color=(0, 200, 0), thick=4, debug=False) 
+window_img = draw_boxes(draw_image, hot_windows, color=(0, 200, 0), thick=5, debug=False) 
+# window_img_fast = draw_boxes(draw_image, hot_windows_fast, color=(0, 200, 0), thick=4, debug=False) 
 window_near_debug = draw_boxes(draw_image, windows_near, color=(0, 200, 0), thick=1, debug=False)
 window_far_debug = draw_boxes(draw_image, windows_nearfar, color=(0, 200, 0), thick=1, debug=False)
 
@@ -141,23 +141,21 @@ window_far_debug = draw_boxes(draw_image, windows_nearfar, color=(0, 200, 0), th
 
 plt.figure(figsize=(20,10))
 plt.imshow(window_img)
-plt.savefig('output_images/hot_windows.png')
+plt.title('Hot windows')
+# plt.savefig('output_images/hot_windows.png')
 plt.show()
 
 f = plt.figure(figsize=(20,10))
 plt.subplot(121)
 plt.imshow(window_near_debug)
 plt.title('Sliding windows. Size: {}x{}'.format(win_near, win_near))
-# plt.savefig('output_images/windows_near.png')
-# plt.show()
 
 # plt.figure(figsize=(20,10))
 plt.subplot(122)
 plt.imshow(window_far_debug)
 plt.title('Sliding windows. Size: {}x{}'.format(win_nearfar, win_nearfar))
-# plt.savefig('output_images/windows_nearfar.png')
-# plt.show()
-f.savefig('output_images/sliding_windows.png')
+# f.savefig('output_images/sliding_windows.png')
+plt.show()
 
 
 heat = np.zeros_like(image[:,:,0]).astype(np.float)
@@ -166,21 +164,29 @@ heat = np.zeros_like(image[:,:,0]).astype(np.float)
 heat = add_heat(heat,hot_windows)
     
 # Apply threshold to help remove false positives
-heat = apply_threshold(heat,1)
+heat_thresh = 3
+heat = apply_threshold(heat,heat_thresh)
 
 # Visualize the heatmap when displaying    
 heatmap = np.clip(heat, 0, 255)
 
 # Find final boxes from heatmap using label function
 labels = label(heatmap)
-draw_img = draw_labeled_bboxes(np.copy(image), labels)
+draw_img = draw_labeled_bboxes(np.copy(image), labels, color=(0, 1, 0))
 
 fig = plt.figure()
 plt.subplot(121)
-plt.imshow(draw_img)
+plt.imshow(window_img)
 plt.title('Car Positions')
 plt.subplot(122)
 plt.imshow(heatmap, cmap='hot')
 plt.title('Heat Map')
 fig.tight_layout()
-fig.savefig('output_images/heatmap.png')
+# fig.savefig('output_images/heatmap.png')
+plt.show()
+
+plt.figure()
+plt.imshow(draw_img)
+plt.title('Final boxes')
+# plt.savefig('output_images/final_box.png')
+plt.show()

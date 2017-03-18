@@ -393,11 +393,6 @@ def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, debug=False):
     
     if debug:
         color = (250, 0, 0)
-#        color = 200
-#        print(color)
-#        plt.figure(figsize=(20,10))
-#        plt.imshow(imcopy)
-#        plt.show()
 
     # Iterate through the bounding boxes
     for bbox in bboxes:
@@ -652,18 +647,18 @@ def pipeline(image, mtx, dist, clf, scaler):
 
     # Define windows size proportional to image shape
     img_shape = image.shape
-    win_near = np.int(img_shape[0]/4)
+    win_near = np.int(img_shape[0]/4) # 180
     xy_window_near = (win_near , win_near)
-    win_nearfar = np.int(win_near/2)
+    win_nearfar = np.int(win_near/2) # 90
     xy_window_nearfar = (win_nearfar, win_nearfar)
     y_start_stop_near = [win_near*2, None] # near
     y_start_stop_nearfar = [win_near*2, np.int(img_shape[0]*3/4)] # in the middle
     
     windows_near = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop_near, 
-                        xy_window=xy_window_near, xy_overlap=(0.75, 0.75))
+                        xy_window=xy_window_near, xy_overlap=xy_overlap)
     
     windows_nearfar = slide_window(image, x_start_stop=[None, None], y_start_stop=y_start_stop_nearfar, 
-                        xy_window=xy_window_nearfar, xy_overlap=(0.75, 0.75))
+                        xy_window=xy_window_nearfar, xy_overlap=xy_overlap)
     
     windows = []
     windows.extend(windows_near)
